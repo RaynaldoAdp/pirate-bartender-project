@@ -3,9 +3,10 @@ var preferences = [];
 
 var indexId = 0;
 
-var questionTemplate = '<div>'+
+var questionTemplate = 
+						'<div>'+
 						'<label class="js-questionLabel"></label>'+
-		 					'<select class="js-choice" id="">' +
+								'<select class="js-choice" id="">' +
 								'<option value="Yes"> Yes </option>' +
 								'<option value="No"> No </option>' +
 							'</select>' +
