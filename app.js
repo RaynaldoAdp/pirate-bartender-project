@@ -13,13 +13,16 @@ var questionTemplate = '<div>'+
 
 var drinksTemplate = '<div><h3></h3></div>';
 
+function replaceAll(str, find, replace) {
+  return str.replace(new RegExp(find, 'g'), replace);
+}
 
 //Questions
-var questions = function(questionInput){
+var Questions = function(questionInput){
 	this.question = questionInput;
 }
 
-questions.prototype.render = function(){
+Questions.prototype.render = function(){
 	var questionToRender = $(questionTemplate);
 	questionToRender.find('.js-questionLabel').text((this.question));
 	questionToRender.find('select').attr('id', indexId);
@@ -28,20 +31,21 @@ questions.prototype.render = function(){
 }
 
 function renderQuestionToDom(){
-	$('.js-form').append(new questions('Do ye like yer drinks strong?').render());
-	$('.js-form').append(new questions('Do ye like it with a salty tang?').render());
-	$('.js-form').append(new questions('Are ye a lubber who likes it bitter?').render());
-	$('.js-form').append(new questions('Would ye like a bit of sweetness with yer poison?').render());
-	$('.js-form').append(new questions('Are ye one for a fruity finish?').render());
-	$('.js-form').append('<input type="submit"></input>');
+	var $form = $('.js-form');
+	$form.append(new Questions('Do ye like yer drinks strong?').render());
+	$form.append(new Questions('Do ye like it with a salty tang?').render());
+	$form.append(new Questions('Are ye a lubber who likes it bitter?').render());
+	$form.append(new Questions('Would ye like a bit of sweetness with yer poison?').render());
+	$form.append(new Questions('Are ye one for a fruity finish?').render());
+	$form.append('<input type="submit"></input>');
 }
 
 //Ingredients
-var ingredients = function(ingredientInput){
+var Ingredients = function(ingredientInput){
 	this.ingredient = ingredientInput;
 }
 
-ingredients.prototype.takeRandomIngredient = function(){
+Ingredients.prototype.takeRandomIngredient = function(){
 	var randomIndex = Math.floor(Math.random() * 3); 
 	var random = this.ingredient[randomIndex];
 	return random;
@@ -49,34 +53,39 @@ ingredients.prototype.takeRandomIngredient = function(){
 
 //Pantry
 var pantry = {
-	strong: new ingredients([' Glug of rum', ' slug of whisky', ' splash of gin']),
-	salty: new ingredients([' Olive on a stick', ' salt-dusted rim', ' rasher of bacon']),
-	bitter: new ingredients([' Shake of bitters', ' splash of tonic', ' twist of lemon peel']),
-	sweet: new ingredients([' Sugar cube', ' spoonful of honey', ' splash of cola']),
-	fruity: new ingredients([' Slice of orange', ' dash of cassis', ' cherry on top'])
+	strong: new Ingredients(['Glug of rum', 'slug of whisky', 'splash of gin']),
+	salty: new Ingredients(['Olive on a stick', 'salt-dusted rim', 'rasher of bacon']),
+	bitter: new Ingredients(['Shake of bitters', 'splash of tonic', 'twist of lemon peel']),
+	sweet: new Ingredients(['Sugar cube', 'spoonful of honey', 'splash of cola']),
+	fruity: new Ingredients(['Slice of orange', 'dash of cassis', 'cherry on top'])
 }
 
 //Bartender
-var bartender = function(choice){	
-	this.strong = choice[0];
-	this.salty = choice[1];
-	this.bitter = choice[2];
-	this.sweet = choice[3];
-	this.fruity = choice[4];
+var Bartender = function(preferencesInput){	
+	this.order = preferencesInput;
 }
 
-bartender.prototype.createDrink = function(){
-	var drinkRendered = $(drinksTemplate);
-	var keys = Object.keys(this);
+Bartender.prototype.createDrink = function(){
 	var drink = [];
-	for(i=0; i<keys.length ; i++){
-		if(this[keys[i]] === 'Yes'){
-			drink.push(pantry[keys[i]].takeRandomIngredient());
+	for(i=0; i<this.order.length ; i++){
+		if(this.order[i] === 'Yes'){
+			drink.push(pantry[Object.keys(pantry)[i]].takeRandomIngredient());
 		}
 	}
-	drinkRendered.find('h3').text((drink));
+	return drink;
+}
+
+var Drink = function(drinkCreated){
+	this.drink = drinkCreated;
+}
+
+Drink.prototype.serve = function(){
+	var drinkRendered = $(drinksTemplate);
+	var drinkServed = "Old Sea Dog with " + replaceAll(this.drink.toString(), ",", " & ");
+	drinkRendered.find('h3').text(drinkServed);
 	$('.js-drinks').append(drinkRendered);
 }
+
 
 function updatePreferences(){
 	var preferences = [];
@@ -90,8 +99,9 @@ function updatePreferences(){
 function submitForm(){
 	$('.js-form').submit(function(event){
 		event.preventDefault();
-		var captainJack = new bartender(updatePreferences());
-		captainJack.createDrink();
+		var captainJack = new Bartender(updatePreferences());
+		var drinkServed = new Drink(captainJack.createDrink());
+		drinkServed.serve();
 	})
 }
 
